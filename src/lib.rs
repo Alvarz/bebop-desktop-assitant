@@ -3,9 +3,7 @@ use context_handler::{get_selected_text, send_text_to_context};
 use rdev::Event;
 use std::time::SystemTime;
 
-use enigo::{
-    Enigo, Settings,
-};
+use enigo::{Enigo, Settings};
 
 const WAKE_UP_EVALUATION_TIME: u128 = 1000;
 
@@ -60,13 +58,12 @@ impl Assistant {
     }
 
     fn evaluate(&mut self) {
-        let mut enigo = Enigo::new(&Settings::default()).unwrap();
-        if let Some(text) = get_selected_text(&mut enigo) {
+        if let Some(text) = get_selected_text() {
             self.command += &(" ".to_string() + &text);
         }
 
         // send_text_to_context(&self.command, &mut enigo);
-        send_text_to_context("response text", &mut enigo);
+        send_text_to_context("response text");
         self.reset();
     }
 

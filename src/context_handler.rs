@@ -2,19 +2,21 @@ use clipboard::{ClipboardContext, ClipboardProvider};
 
 use enigo::{
     Direction::{Click, Press, Release},
-    Enigo, Key, Keyboard,
+    Enigo, Key, Keyboard, Settings,
 };
 use std::thread;
 use std::time::Duration;
 
-pub fn send_text_to_context(text: &str, enigo: &mut Enigo) {
+pub fn send_text_to_context(text: &str) {
+    let mut enigo = Enigo::new(&Settings::default()).unwrap();
     // Wait briefly to ensure the target window is focused
     let _ = enigo.key(Key::Unicode('\n'), Click);
     thread::sleep(Duration::from_millis(100));
     let _ = enigo.text(&("\r".to_string() + text));
 }
 
-pub fn get_selected_text(enigo: &mut Enigo) -> Option<String> {
+pub fn get_selected_text() -> Option<String> {
+    let mut enigo = Enigo::new(&Settings::default()).unwrap();
     let mut ctx: ClipboardContext = ClipboardProvider::new().ok()?;
 
     // Backup current clipboard
