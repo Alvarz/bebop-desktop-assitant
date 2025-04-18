@@ -1,8 +1,9 @@
 mod context_handler;
+mod gemini;
+mod gemini_types;
 use context_handler::{get_selected_text, send_text_to_context};
 use rdev::Event;
 use std::time::SystemTime;
-
 
 const WAKE_UP_EVALUATION_TIME: u128 = 1000;
 
@@ -56,14 +57,32 @@ impl Assistant {
         self.command = "".to_owned();
     }
 
-    fn evaluate(&mut self) {
+    fn evaluate(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(text) = get_selected_text() {
             self.command += &(" ".to_string() + &text);
         }
 
+        // let response = gemini::chat_completion(self.command.clone()).await;
+
+        let response = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()?
+            .block_on(gemini::chat_completion(self.command.clone()));
+
+        match response {
+            Ok(text) => {
+                send_text_to_context(&text);
+            }
+            Err(e) => {
+                println!("error: {:?}", e)
+            }
+        }
+
         // send_text_to_context(&self.command, &mut enigo);
-        send_text_to_context("response text");
+        //send_text_to_context("response text");
+        // send_text_to_context(&response);
         self.reset();
+        Ok(())
     }
 
     fn evaluate_word(&mut self, keypress: String, pressed_time: SystemTime) {
@@ -106,7 +125,7 @@ impl Assistant {
         match keypress {
             val if val == "\r".to_owned() => {
                 self.state = State::Evaluating;
-                self.evaluate()
+                let _ = self.evaluate();
             }
             _ => {
                 self.command += &keypress;
