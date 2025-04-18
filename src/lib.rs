@@ -3,7 +3,6 @@ use context_handler::{get_selected_text, send_text_to_context};
 use rdev::Event;
 use std::time::SystemTime;
 
-use enigo::{Enigo, Settings};
 
 const WAKE_UP_EVALUATION_TIME: u128 = 1000;
 
