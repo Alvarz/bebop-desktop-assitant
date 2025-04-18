@@ -13,7 +13,6 @@ use crate::gemini_types::{GeminiChatCompletionResponseStream, GeminiCreateChatCo
 fn get_gemini_client() -> Client<OpenAIConfig> {
     let base_url = "https://generativelanguage.googleapis.com/v1beta/openai";
     let api_key = std::env::var("GEMINI_API_KEY").expect("GEMINI_API_KEY must be set");
-    // let api_key = "AIzaSyABKXfSIL-bD5N7vayzu-QcpcMj6Mk7CEA";
     let config = OpenAIConfig::new()
         .with_api_base(base_url)
         .with_api_key(api_key);
