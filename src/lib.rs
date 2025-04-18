@@ -1,8 +1,13 @@
+mod context_handler;
+use context_handler::{get_selected_text, send_text_to_context};
+use rdev::Event;
 use std::time::SystemTime;
 
-use rdev::Event;
-
-use enigo::*;
+use enigo::{
+    Button, Coordinate,
+    Direction::{Click, Press, Release},
+    Enigo, Key, Keyboard, Mouse, Settings,
+};
 use std::thread;
 use std::time::Duration;
 
@@ -59,15 +64,19 @@ impl Assistant {
     }
 
     fn evaluate(&mut self) {
-        println!("evaluating {:?}", self.command);
-        send_text_to_context(&self.command);
+        let mut enigo = Enigo::new(&Settings::default()).unwrap();
+        if let Some(text) = get_selected_text(&mut enigo) {
+            self.command += &(" ".to_string() + &text);
+        }
+
+        // send_text_to_context(&self.command, &mut enigo);
+        send_text_to_context("response text", &mut enigo);
         self.reset();
     }
 
     fn evaluate_word(&mut self, keypress: String, pressed_time: SystemTime) {
         match keypress {
             val if val == self.wake_char.to_owned() => {
-                println!("pressed {:?} at {:?}", self.wake_char, pressed_time);
                 self.pressed_time = Some(pressed_time);
                 self.state = State::Expecting;
             }
@@ -78,15 +87,9 @@ impl Assistant {
     fn compute_word_diff(&mut self, keypress: String, pressed_time: SystemTime) {
         match keypress {
             val if val == self.wake_char.to_owned() => {
-                println!(
-                    "pressed {:?} in compute_word_diff at {:?}",
-                    self.wake_char, pressed_time
-                );
                 if let Some(last_pressed_time) = self.pressed_time {
                     match pressed_time.duration_since(last_pressed_time) {
                         Ok(duration) => {
-                            println!("Time elapsed: {} ms", duration.as_millis());
-
                             if duration.as_millis() <= WAKE_UP_EVALUATION_TIME {
                                 self.state = State::Listening;
                             } else {
@@ -99,7 +102,6 @@ impl Assistant {
                         }
                     }
                 }
-                println!("pressed {:?} at {:?}", self.wake_char, pressed_time);
                 self.pressed_time = Some(pressed_time);
             }
             _ => {
@@ -109,7 +111,6 @@ impl Assistant {
     }
 
     fn listening_command(&mut self, keypress: String) {
-        println!("pressed {:?}", keypress);
         match keypress {
             val if val == "\r".to_owned() => {
                 self.state = State::Evaluating;
@@ -120,11 +121,4 @@ impl Assistant {
             }
         }
     }
-}
-
-fn send_text_to_context(text: &str) {
-    let mut enigo = Enigo::new(&Settings::default()).unwrap();
-    // Wait briefly to ensure the target window is focused
-    thread::sleep(Duration::from_millis(50));
-    let _ = enigo.text(&("\r".to_string() + text));
 }
