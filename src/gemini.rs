@@ -1,7 +1,7 @@
 use async_openai::{
     config::OpenAIConfig,
     types::{
-        ChatCompletionRequestMessage, ChatCompletionRequestUserMessage,
+        ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs,
         CreateChatCompletionRequestArgs,
     },
     Client,
@@ -24,14 +24,16 @@ pub async fn stream_chat(text: String) -> Result<(), Box<dyn Error>> {
     let request = CreateChatCompletionRequestArgs::default()
         //Usage of gemini model
         .model("gemini-2.0-flash")
-        .messages(vec![ChatCompletionRequestMessage::User(
-            ChatCompletionRequestUserMessage {
-                content: async_openai::types::ChatCompletionRequestUserMessageContent::Text(
-                    text.into(),
-                ),
-                ..Default::default()
-            },
-        )])
+        .messages([
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content("You are a helpful assistant.")
+                .build()?
+                .into(),
+            ChatCompletionRequestUserMessageArgs::default()
+                .content(text)
+                .build()?
+                .into(),
+        ])
         .n(1)
         .stream(true)
         .max_tokens(500_u32)
@@ -57,10 +59,16 @@ pub async fn chat_completion(text: String) -> Result<String, Box<dyn Error>> {
     let request = CreateChatCompletionRequestArgs::default()
         //Usage of gemini model
         .model("gemini-2.0-flash")
-        .messages([ChatCompletionRequestMessage::User(
-            //"How old is the human civilization?".into(),
-            text.into(),
-        )])
+        .messages([
+            ChatCompletionRequestSystemMessageArgs::default()
+                .content("You are a helpful assistant.")
+                .build()?
+                .into(),
+            ChatCompletionRequestUserMessageArgs::default()
+                .content(text)
+                .build()?
+                .into(),
+        ])
         // .max_tokens(40_u32)
         .build()?;
 
