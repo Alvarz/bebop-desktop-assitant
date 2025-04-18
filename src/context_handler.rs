@@ -1,9 +1,8 @@
 use clipboard::{ClipboardContext, ClipboardProvider};
 
 use enigo::{
-    Button, Coordinate,
     Direction::{Click, Press, Release},
-    Enigo, Key, Keyboard, Mouse, Settings,
+    Enigo, Key, Keyboard,
 };
 use std::thread;
 use std::time::Duration;

@@ -4,12 +4,8 @@ use rdev::Event;
 use std::time::SystemTime;
 
 use enigo::{
-    Button, Coordinate,
-    Direction::{Click, Press, Release},
-    Enigo, Key, Keyboard, Mouse, Settings,
+    Enigo, Settings,
 };
-use std::thread;
-use std::time::Duration;
 
 const WAKE_UP_EVALUATION_TIME: u128 = 1000;
 
