@@ -2,6 +2,10 @@ use std::time::SystemTime;
 
 use rdev::Event;
 
+use enigo::*;
+use std::thread;
+use std::time::Duration;
+
 const WAKE_UP_EVALUATION_TIME: u128 = 1000;
 
 #[derive(Debug)]
@@ -56,6 +60,7 @@ impl Assistant {
 
     fn evaluate(&mut self) {
         println!("evaluating {:?}", self.command);
+        send_text_to_context(&self.command);
         self.reset();
     }
 
@@ -115,4 +120,11 @@ impl Assistant {
             }
         }
     }
+}
+
+fn send_text_to_context(text: &str) {
+    let mut enigo = Enigo::new(&Settings::default()).unwrap();
+    // Wait briefly to ensure the target window is focused
+    thread::sleep(Duration::from_millis(50));
+    let _ = enigo.text(&("\r".to_string() + text));
 }
